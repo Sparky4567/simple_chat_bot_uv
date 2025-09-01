@@ -1,0 +1,120 @@
+from chatterbot import ChatBot
+from chatterbot.trainers import ListTrainer
+import warnings
+from sqlalchemy.exc import SAWarning
+from icecream import ic
+from sentence_transformers import SentenceTransformer, util
+from datetime import datetime
+import json
+import os
+
+# --- Config ---
+USE_SIMILARITY_SCORING = True
+SIMILARITY_THRESHOLD = 0.6
+CONTEXT_WINDOW = 3
+MEMORY_FILE = "conversation_memory.json"
+
+# --- Suppress noisy SAWarning ---
+warnings.filterwarnings(
+    "ignore",
+    category=SAWarning,
+    message=".*Object of type <Statement> not in session.*"
+)
+
+# --- Chatbot setup ---
+chatbot = ChatBot("ALIS v.3.0")
+history_trainer = ListTrainer(chatbot)
+
+# --- Long-term memory helpers ---
+def load_memory():
+    if os.path.exists(MEMORY_FILE):
+        with open(MEMORY_FILE, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return []
+
+def save_memory(history):
+    with open(MEMORY_FILE, "w", encoding="utf-8") as f:
+        json.dump(history, f, ensure_ascii=False, indent=2)
+
+conversation_history = load_memory()
+
+# --- Semantic model ---
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
+# --- Similarity helpers ---
+def semantic_similarity(input_text, candidate_texts):
+    if not candidate_texts:
+        return None, 0.0
+    input_emb = model.encode(input_text, convert_to_tensor=True)
+    candidate_embs = model.encode(candidate_texts, convert_to_tensor=True)
+    scores = util.cos_sim(input_emb, candidate_embs)
+    best_idx = scores.argmax()
+    return candidate_texts[best_idx], float(scores[0][best_idx])
+
+def get_context_window(history, window_size=CONTEXT_WINDOW):
+    return " ".join(history[-window_size*2:])  # user + bot messages
+
+# --- Fallback rules ---
+def fallback_rules(user_input):
+    if any(greet in user_input.lower() for greet in ["hi", "hello", "hey"]):
+        return "Hello! How are you today?"
+    if "time" in user_input.lower():
+        return f"The current time is {datetime.now().strftime('%H:%M:%S')}"
+    return "I'm not sure what to say to that."
+
+# --- Main loop ---
+def starter_function():
+    user_input = str(input("You: ")).strip()
+    match user_input:
+        case "quit":
+            save_memory(conversation_history)
+            quit()
+        case "retrain":
+            if conversation_history:
+                print("Retraining on past conversation...")
+                history_trainer.train(conversation_history)
+                starter_function()
+            else:
+                print("No conversation history yet.\n")
+                starter_function()
+        case _:
+            conversation_history.append(user_input)
+            print(f"User input - {user_input} - appended to history")
+
+            try:
+                bot_response = chatbot.get_response(user_input)
+                source = "ChatterBot"
+
+                if USE_SIMILARITY_SCORING:
+                    context_text = get_context_window(conversation_history)
+                    candidate_texts = [str(statement.text) for statement in chatbot.storage.filter()]
+                    best_match, score = semantic_similarity(context_text + " " + user_input, candidate_texts)
+                    
+                    if score >= SIMILARITY_THRESHOLD:
+                        bot_response = best_match
+                        source = f"Semantic Match (score={score:.2f})"
+                    else:
+                        bot_response = fallback_rules(user_input)
+                        source = "Fallback Rule"
+
+                ic(f"Bot: {bot_response} | Source: {source}")
+                conversation_history.append(str(bot_response).strip())
+                save_memory(conversation_history)
+                print(f"Bot answer - {bot_response} - appended to history")
+                starter_function()
+
+            except Exception as e:
+                print(f"Error: {e}")
+                bot_response = "Something went wrong."
+                starter_function()
+            except KeyboardInterrupt:
+                save_memory(conversation_history)
+                print("Quitting...")
+                quit()
+
+starter_function()
+
+
+uv pip install sentence-transformers
+uv pip install torch
+
