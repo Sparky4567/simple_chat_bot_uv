@@ -6,6 +6,7 @@ readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
     "chatterbot>=1.2.7",
+    "icecream>=2.1.7",
     "pip>=25.2",
     "requests>=2.32.5",
     "spacy>=3.8.7",
