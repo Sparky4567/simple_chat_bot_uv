@@ -1,41 +1,55 @@
 from chatterbot import ChatBot
-from chatterbot.trainers import ChatterBotCorpusTrainer, ListTrainer
+from chatterbot.trainers import ListTrainer
 import warnings
 from sqlalchemy.exc import SAWarning
 from icecream import ic
 from difflib import SequenceMatcher
-
+from piper.voice import PiperVoice
+import os
+import wave
+import sounddevice as sd
+import soundfile as sf
 # --- Config ---
-USE_SIMILARITY_SCORING = True  # toggle similarity scoring on/off
-SIMILARITY_THRESHOLD = 0.3     # tweak sensitivity if enabled
+USE_SIMILARITY_SCORING = True
+SPEAK_BACK=False
+SIMILARITY_THRESHOLD = 0.3
+BOT_NAME = "ALIS v.1.0"
+VOICE_MODEL_PATH = os.path.join(os.getcwd(), "amy", "en_US-amy-low.onnx")
 
 # --- Suppress noisy SAWarning ---
-# This warning happens because Bot creates Statement objects
-# outside the current SQLAlchemy session, then touches relationships.
-# It's harmless in practice (Bot handles persistence on its own),
-# but noisy. We filter it here to keep logs clean without affecting
-# actual DB operations.
-BOT_NAME = "ALIS v.1.0"
-
 warnings.filterwarnings(
     "ignore",
     category=SAWarning,
     message=".*Object of type <Statement> not in session.*"
 )
 
-# --- Create the chatbot ---
+# --- Initialize chatbot ---
 chatbot = ChatBot(BOT_NAME)
-
-# 1. Train with the built-in English corpus (optional)
-# corpus_trainer = ChatterBotCorpusTrainer(chatbot)
-# corpus_trainer.train("chatterbot.corpus.english")
-
-# 2. Keep track of conversation history for retraining
 conversation_history = []
 history_trainer = ListTrainer(chatbot)
 
-print("SimpleBot is ready. Type 'quit' to exit, 'retrain' to retrain on past chats.\n\n")
-print(BOT_NAME+ " is ready.\n\n")
+# --- Initialize Piper TTS ---
+voice = PiperVoice.load(VOICE_MODEL_PATH)
+
+import sounddevice as sd
+from piper.voice import PiperVoice
+
+def speak(text):
+    if SPEAK_BACK:
+        file_name = "test.wav"
+        try:
+            with wave.open(file_name, "wb") as wav_file:
+                voice.synthesize_wav(text, wav_file)
+            data, samplerate = sf.read(file_name, dtype='float32')
+
+            # Play it
+            sd.play(data, samplerate=samplerate)
+            sd.wait()
+        except Exception as e:
+            print(f"Speech error: {e}")
+
+
+
 # --- Similarity helpers ---
 def similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
@@ -62,7 +76,7 @@ def starter_function():
                     history_trainer.train(conversation_history)
                     starter_function()
                 else:
-                    print("No conversation history yet. Check if the variable is defined.\n\n")
+                    print("No conversation history yet.\n")
                     starter_function()
             case _:
                 conversation_history.append(user_input)
@@ -79,7 +93,11 @@ def starter_function():
 
                     ic(f"Bot: {bot_response}")
                     conversation_history.append(str(bot_response).strip())
-                    print(f"Bot answer - {bot_response} - was appended to history")
+                    print(f"Bot answer - {bot_response} - appended to history")
+
+                    # --- Speak the bot response ---
+                    speak(str(bot_response))
+
                     starter_function()
 
                 except Exception as e:
@@ -97,4 +115,5 @@ def starter_function():
         print("Quitting...")
         quit()
 
+print(f"{BOT_NAME} is ready. Type 'quit' to exit, 'retrain' to retrain on past chats.\n\n")
 starter_function()
