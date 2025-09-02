@@ -13,7 +13,7 @@ import time
 # --- Config ---
 USE_SIMILARITY_SCORING = True
 SPHINX=False
-SPEAK_BACK=False
+SPEAK_BACK=True
 SIMILARITY_THRESHOLD = 0.3
 BOT_NAME = "ALIS v.1.0"
 VOICE_MODEL_PATH = os.path.join(os.getcwd(), "amy", "en_US-amy-low.onnx")
@@ -45,7 +45,7 @@ def listen_once(silence_threshold=10):
     """
     buffer = []
     last_speech_time = None
-
+    print("Speak now\n\n")
     for phrase in LiveSpeech():
         text = str(phrase).strip()
 
