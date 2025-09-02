@@ -9,8 +9,10 @@ import os
 import wave
 import sounddevice as sd
 import soundfile as sf
+import time
 # --- Config ---
 USE_SIMILARITY_SCORING = True
+SPHINX=False
 SPEAK_BACK=False
 SIMILARITY_THRESHOLD = 0.3
 BOT_NAME = "ALIS v.1.0"
@@ -33,6 +35,31 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 
 import sounddevice as sd
 from piper.voice import PiperVoice
+from pocketsphinx import LiveSpeech
+
+def listen_once(silence_threshold=10):
+    """
+    Listen for a single phrase and return it after detecting silence.
+    
+    :param silence_threshold: seconds of silence required to close phrase
+    """
+    buffer = []
+    last_speech_time = None
+
+    for phrase in LiveSpeech():
+        text = str(phrase).strip()
+
+        if text:
+            if not buffer:
+                print("[Speech started]")
+            buffer.append(text)
+            last_speech_time = time.time()
+        else:
+            if buffer and last_speech_time:
+                elapsed = time.time() - last_speech_time
+                if elapsed > silence_threshold:
+                    print("[Speech ended]")
+                    return " ".join(buffer)
 
 def speak(text):
     if SPEAK_BACK:
@@ -63,10 +90,20 @@ def get_best_match(user_input, chatbot):
             best_match, best_score = response, score
     return best_match, best_score
 
+def get_user_input():
+    try:
+        if SPHINX:
+            user_input = listen_once()
+        else:
+            user_input = str(input("You: ")).strip()
+        return str(user_input).strip()
+    except Exception as e:
+        print("Exception: {e}".format(e))
+        starter_function()
 # --- Main loop ---
 def starter_function():
     try:
-        user_input = str(input("You: ")).strip()
+        user_input = get_user_input()
         match user_input:
             case "quit":
                 quit()
