@@ -14,7 +14,7 @@ import time
 USE_SIMILARITY_SCORING = True
 SPHINX=False
 SPEAK_BACK=True
-SIMILARITY_THRESHOLD = 0.3
+SIMILARITY_THRESHOLD = 0.7
 BOT_NAME = "ALIS v.1.0"
 VOICE_MODEL_PATH = os.path.join(os.getcwd(), "amy", "en_US-amy-low.onnx")
 
