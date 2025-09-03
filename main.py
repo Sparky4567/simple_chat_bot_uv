@@ -16,7 +16,7 @@ SPHINX=False
 SPEAK_BACK=True
 SIMILARITY_THRESHOLD = 0.7
 BOT_NAME = "ALIS v.1.0"
-VOICE_MODEL_PATH = os.path.join(os.getcwd(), "amy", "en_US-amy-low.onnx")
+VOICE_MODEL_PATH = os.path.join(os.getcwd(), "semane", "en_GB-semaine-medium.onnx")
 
 # --- Suppress noisy SAWarning ---
 warnings.filterwarnings(
