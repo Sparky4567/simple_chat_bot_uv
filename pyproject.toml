@@ -8,6 +8,10 @@ dependencies = [
     "chatterbot>=1.2.7",
     "icecream>=2.1.7",
     "pip>=25.2",
+    "piper>=0.14.4",
+    "pocketsphinx>=5.0.4",
     "requests>=2.32.5",
+    "sounddevice>=0.5.2",
+    "soundfile>=0.13.1",
     "spacy>=3.8.7",
 ]
