@@ -18,7 +18,7 @@ USE_SIMILARITY_SCORING = True
 
 # ollama
 
-USE_LOCAL_LLM = True
+USE_LOCAL_LLM = False
 DEFAULT_LLM_MODEL = "tinyllama:latest"
 # Initialize the Ollama LLM
 llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
