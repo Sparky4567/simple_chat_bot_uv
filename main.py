@@ -90,7 +90,8 @@ def listen_once(silence_threshold=10):
 
         if text:
             if not buffer:
-                print("[Speech started]")
+                print("[Speech started]\n\n")
+                print(str("{}\n").format(text))
             buffer.append(text)
             last_speech_time = time.time()
         else:
@@ -141,9 +142,10 @@ def get_user_input():
     try:
         if SPHINX:
             user_input = listen_once()
+            return str(user_input).strip()
         else:
             user_input = str(input("You: ")).strip()
-        return str(user_input).strip()
+            return str(user_input).strip()
     except Exception as e:
         print("Exception: {e}".format(e))
         starter_function()
