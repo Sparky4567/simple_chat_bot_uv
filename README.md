@@ -4,6 +4,8 @@
 
 If you're experiencing any errors trying to launch it, Google first - ask later
 
+(Might be useful to create vtubing characters)
+
 ```
 uv run main.py
 ```
