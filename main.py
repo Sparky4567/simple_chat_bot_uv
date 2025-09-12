@@ -18,8 +18,8 @@ USE_SIMILARITY_SCORING = True
 
 # ollama
 
-USE_LOCAL_LLM = False
-DEFAULT_LLM_MODEL = "tinyllama:latest"
+USE_LOCAL_LLM = True
+DEFAULT_LLM_MODEL = "qwen3:0.6b"
 # Initialize the Ollama LLM
 llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
 
@@ -66,7 +66,7 @@ def get_response_from_llm(passed_prompt):
     try:
         formatted_prompt = prompt.format(question=passed_prompt)
         text=""
-        for chunk in llm.stream(formatted_prompt):
+        for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
             print(chunk, end='', flush=True)
             text+=chunk
         print("\n\n")
@@ -169,6 +169,7 @@ def starter_function():
                 try:
                     if USE_LOCAL_LLM:
                         bot_response = get_response_from_llm(user_input)
+                        bot_response = str(bot_response).split("</think>")[1].strip() if "</think>" in bot_response else bot_response
                     else:
                         bot_response = chatbot.get_response(user_input)
                         chunk_print(f"Bot: {bot_response}")
