@@ -44,7 +44,7 @@ def load_memories():
 # Define a prompt template
 prompt = PromptTemplate(
     input_variables=["question"],
-    template="The following is a record of past conversations:{memories}\nQ: {question}\nA:"
+    template="The following is a record of past conversations:{memories}\nQ: {question}\n"
 )
 
 
@@ -81,12 +81,12 @@ from piper.voice import PiperVoice
 from pocketsphinx import LiveSpeech
 
 
-
+MEMORIES = load_memories()
+print(MEMORIES)
 
 def get_response_from_llm(passed_prompt):
     try:
-        MEMORIES = load_memories()
-        print(MEMORIES)
+     
         formatted_prompt = prompt.format(memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
