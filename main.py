@@ -1,6 +1,8 @@
 from langchain_ollama import OllamaLLM
 from langchain.prompts import PromptTemplate
-
+import sounddevice as sd
+from piper.voice import PiperVoice
+from pocketsphinx import LiveSpeech
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 import warnings
@@ -15,17 +17,9 @@ import soundfile as sf
 import time
 from memories.Mem_module import MemoryDB
 
-# --- Config ---
-USE_SIMILARITY_SCORING = True
+# --- Memories ---
 
-# ollama
-
-USE_LOCAL_LLM = True
-DEFAULT_LLM_MODEL = "qwen3:0.6b"
-# Initialize the Ollama LLM
-llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
 memories = MemoryDB()
-
 
 def load_memories():
     try:
@@ -37,29 +31,30 @@ def load_memories():
             return "No memories found"
     except Exception as e:
         return "No memories found"
-    
 
+MEMORIES = load_memories()
+print(MEMORIES)
 
+# --- Config ---
+USE_SIMILARITY_SCORING = True
+USE_LOCAL_LLM = True
+SPHINX=False
+SPEAK_BACK=True
+BOT_NAME = "ALIS v.1.0"
+VOICE_MODEL_PATH = os.path.join(os.getcwd(), "semane", "en_GB-semaine-medium.onnx")
+DEFAULT_LLM_MODEL = "qwen3:0.6b"
+SIMILARITY_THRESHOLD = 0.85
+
+# ollama
+
+# Initialize the Ollama LLM
+llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
 
 # Define a prompt template
 prompt = PromptTemplate(
     input_variables=["question"],
     template="The following is a record of past conversations:{memories}\nQ: {question}\n"
 )
-
-
-SPHINX=False
-SPEAK_BACK=True
-
-
-
-
-SIMILARITY_THRESHOLD = 0.85
-
-
-
-BOT_NAME = "ALIS v.1.0"
-VOICE_MODEL_PATH = os.path.join(os.getcwd(), "semane", "en_GB-semaine-medium.onnx")
 
 # --- Suppress noisy SAWarning ---
 warnings.filterwarnings(
@@ -75,14 +70,6 @@ history_trainer = ListTrainer(chatbot)
 
 # --- Initialize Piper TTS ---
 voice = PiperVoice.load(VOICE_MODEL_PATH)
-
-import sounddevice as sd
-from piper.voice import PiperVoice
-from pocketsphinx import LiveSpeech
-
-
-MEMORIES = load_memories()
-print(MEMORIES)
 
 def get_response_from_llm(passed_prompt):
     try:
@@ -146,9 +133,8 @@ def speak(text):
         except Exception as e:
             print(f"Speech error: {e}")
 
-
-
 # --- Similarity helpers ---
+
 def similarity(a, b):
     return SequenceMatcher(None, a, b).ratio()
 
@@ -210,12 +196,9 @@ def starter_function():
                     memory_db.add_memory(user_input, str(bot_response).strip())
                     print(f"Memory was added to database.")
                     print(f"Bot answer - {bot_response} - appended to history")
-
                     # --- Speak the bot response ---
                     speak(str(bot_response))
-
                     starter_function()
-
                 except Exception as e:
                     print(f"Error: {e}")
                     bot_response = "Something went wrong."
