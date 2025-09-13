@@ -13,6 +13,8 @@ import wave
 import sounddevice as sd
 import soundfile as sf
 import time
+from memories.Mem_module import MemoryDB
+
 # --- Config ---
 USE_SIMILARITY_SCORING = True
 
@@ -22,16 +24,33 @@ USE_LOCAL_LLM = True
 DEFAULT_LLM_MODEL = "qwen3:0.6b"
 # Initialize the Ollama LLM
 llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
+memories = MemoryDB()
+
+
+def load_memories():
+    try:
+        memories_list = memories.fetch_all()
+        if memories_list:
+            memories_text="\n".join(memories.fetch_all())
+            return memories_text
+        else:
+            return "No memories found"
+    except Exception as e:
+        return "No memories found"
+    
+
+
 
 # Define a prompt template
 prompt = PromptTemplate(
     input_variables=["question"],
-    template="Q: {question}\nA:"
+    template="The following is a record of past conversations:{memories}\nQ: {question}\nA:"
 )
 
 
 SPHINX=False
 SPEAK_BACK=True
+
 
 
 
@@ -62,9 +81,13 @@ from piper.voice import PiperVoice
 from pocketsphinx import LiveSpeech
 
 
+
+
 def get_response_from_llm(passed_prompt):
     try:
-        formatted_prompt = prompt.format(question=passed_prompt)
+        MEMORIES = load_memories()
+        print(MEMORIES)
+        formatted_prompt = prompt.format(memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
             print(chunk, end='', flush=True)
@@ -183,6 +206,9 @@ def starter_function():
                                 bot_response = "I'm not sure what to say to that."
 
                     conversation_history.append(str(bot_response).strip())
+                    memory_db = MemoryDB()
+                    memory_db.add_memory(user_input, str(bot_response).strip())
+                    print(f"Memory was added to database.")
                     print(f"Bot answer - {bot_response} - appended to history")
 
                     # --- Speak the bot response ---
