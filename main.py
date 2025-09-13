@@ -35,6 +35,8 @@ def load_memories():
 MEMORIES = load_memories()
 print(MEMORIES)
 
+# ------
+
 # --- Config ---
 USE_SIMILARITY_SCORING = True
 USE_LOCAL_LLM = True
@@ -45,7 +47,7 @@ VOICE_MODEL_PATH = os.path.join(os.getcwd(), "semane", "en_GB-semaine-medium.onn
 DEFAULT_LLM_MODEL = "qwen3:0.6b"
 SIMILARITY_THRESHOLD = 0.85
 
-# ollama
+# OLLAMA
 
 # Initialize the Ollama LLM
 llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
@@ -63,6 +65,8 @@ warnings.filterwarnings(
     message=".*Object of type <Statement> not in session.*"
 )
 
+
+
 # --- Initialize chatbot ---
 chatbot = ChatBot(BOT_NAME)
 conversation_history = []
@@ -73,7 +77,6 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 
 def get_response_from_llm(passed_prompt):
     try:
-     
         formatted_prompt = prompt.format(memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
