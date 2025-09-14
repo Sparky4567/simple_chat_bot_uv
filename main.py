@@ -9,13 +9,25 @@ import warnings
 from sqlalchemy.exc import SAWarning
 from icecream import ic
 from difflib import SequenceMatcher
-from piper.voice import PiperVoice
-import os
 import wave
 import sounddevice as sd
 import soundfile as sf
 import time
 from memories.Mem_module import MemoryDB
+
+# Import settings
+
+from settings.settings import (
+    USE_SIMILARITY_SCORING,
+    USE_LOCAL_LLM,
+    SPHINX,
+    SPEAK_BACK,
+    BOT_NAME,
+    VOICE_MODEL_PATH,
+    DEFAULT_LLM_MODEL,
+    SIMILARITY_THRESHOLD,
+    DIRECTIVES
+)
 
 # --- Memories ---
 
@@ -37,15 +49,6 @@ print(MEMORIES)
 
 # ------
 
-# --- Config ---
-USE_SIMILARITY_SCORING = True
-USE_LOCAL_LLM = True
-SPHINX=False
-SPEAK_BACK=True
-BOT_NAME = "ALIS v.1.0"
-VOICE_MODEL_PATH = os.path.join(os.getcwd(), "semane", "en_GB-semaine-medium.onnx")
-DEFAULT_LLM_MODEL = "qwen3:0.6b"
-SIMILARITY_THRESHOLD = 0.85
 
 # OLLAMA
 
@@ -55,7 +58,7 @@ llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
 # Define a prompt template
 prompt = PromptTemplate(
     input_variables=["question"],
-    template="The following is a record of past conversations:{memories}\nQ: {question}\n"
+    template="Those are your instructions:{directives}\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
 )
 
 # --- Suppress noisy SAWarning ---
@@ -77,7 +80,7 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 
 def get_response_from_llm(passed_prompt):
     try:
-        formatted_prompt = prompt.format(memories=MEMORIES,question=passed_prompt)
+        formatted_prompt = prompt.format(directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
             print(chunk, end='', flush=True)
