@@ -26,6 +26,7 @@ from settings.settings import (
     VOICE_MODEL_PATH,
     DEFAULT_LLM_MODEL,
     SIMILARITY_THRESHOLD,
+    SPECIAL_DIRECTIVES,
     DIRECTIVES
 )
 
@@ -58,7 +59,7 @@ llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
 # Define a prompt template
 prompt = PromptTemplate(
     input_variables=["question"],
-    template="Those are your instructions:{directives}\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
+    template="Those are your possible moods:{moods},Those are your instructions:{directives}\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
 )
 
 # --- Suppress noisy SAWarning ---
@@ -80,7 +81,7 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 
 def get_response_from_llm(passed_prompt):
     try:
-        formatted_prompt = prompt.format(directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
+        formatted_prompt = prompt.format(moods=SPECIAL_DIRECTIVES,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
             print(chunk, end='', flush=True)
