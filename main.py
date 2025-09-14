@@ -46,7 +46,8 @@ def load_memories():
         return "No memories found"
 
 MEMORIES = load_memories()
-print(MEMORIES)
+print("Memories have been loaded.\n\n")
+#print(MEMORIES)
 
 # ------
 
