@@ -30,7 +30,6 @@ from settings.settings import (
     SPECIAL_DIRECTIVES,
     directives_loader
 )
-DIRECTIVES = directives_loader(BOT_NAME)
 # --- Memories ---
 
 memories = MemoryDB()
@@ -84,6 +83,8 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 
 def get_response_from_llm(passed_prompt):
     try:
+        DIRECTIVES = directives_loader(BOT_NAME)
+        print("Loading directives...\n\n")
         MEMORIES = load_memories()
         print("Memories have been loaded.\n\n")
         #print(MEMORIES)
