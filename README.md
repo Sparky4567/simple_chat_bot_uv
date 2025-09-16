@@ -6,6 +6,9 @@ If you're experiencing any errors trying to launch it, Google first - ask later
 
 (Might be useful to create vtubing characters)
 
+
 ```
 uv run main.py
 ```
+
+### P.s. First run requires to set USE_LOCAL_LLM to False

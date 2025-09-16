@@ -18,6 +18,7 @@ from memories.Mem_module import MemoryDB
 # Import settings
 
 from settings.settings import (
+    BOT_NAME,
     USE_SIMILARITY_SCORING,
     USE_LOCAL_LLM,
     SPHINX,
@@ -27,9 +28,9 @@ from settings.settings import (
     DEFAULT_LLM_MODEL,
     SIMILARITY_THRESHOLD,
     SPECIAL_DIRECTIVES,
-    DIRECTIVES
+    directives_loader
 )
-
+DIRECTIVES = directives_loader(BOT_NAME)
 # --- Memories ---
 
 memories = MemoryDB()
