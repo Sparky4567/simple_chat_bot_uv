@@ -45,6 +45,9 @@ def load_memories():
             return "No memories found"
     except Exception as e:
         return "No memories found"
+    except KeyboardInterrupt:
+        print("Quitting...")
+        quit()
 
 
 
