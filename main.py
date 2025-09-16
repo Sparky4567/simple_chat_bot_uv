@@ -58,11 +58,7 @@ def load_memories():
 # Initialize the Ollama LLM
 llm = OllamaLLM(model=DEFAULT_LLM_MODEL)
 
-# Define a prompt template
-prompt = PromptTemplate(
-    input_variables=["question"],
-    template="Those are your possible moods:{moods},Those are your instructions:{directives}\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
-)
+
 
 # --- Suppress noisy SAWarning ---
 warnings.filterwarnings(
@@ -88,6 +84,11 @@ def get_response_from_llm(passed_prompt):
         MEMORIES = load_memories()
         print("Memories have been loaded.\n\n")
         #print(MEMORIES)
+        # Define a prompt template
+        prompt = PromptTemplate(
+            input_variables=["question"],
+            template="Those are your possible moods:{moods},Those are your instructions:{directives}\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
+        )
         formatted_prompt = prompt.format(moods=SPECIAL_DIRECTIVES,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):

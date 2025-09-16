@@ -3,9 +3,9 @@ import os
 # --- Config ---
 USE_SIMILARITY_SCORING = True
 # First run requires to set USE_LOCAL_LLM to False
-USE_LOCAL_LLM=True
+USE_LOCAL_LLM=False
 SPHINX=False
-SPEAK_BACK=False
+SPEAK_BACK=True
 BOT_NAME = "VALERYAN v.1.0"
 VOICE_MODEL_PATH = os.path.join(os.getcwd(), "semane", "en_GB-semaine-medium.onnx")
 # DEFAULT_LLM_MODEL = "tinyllama:latest"
