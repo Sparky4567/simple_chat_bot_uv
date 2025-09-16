@@ -46,9 +46,7 @@ def load_memories():
     except Exception as e:
         return "No memories found"
 
-MEMORIES = load_memories()
-print("Memories have been loaded.\n\n")
-#print(MEMORIES)
+
 
 # ------
 
@@ -83,6 +81,9 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 
 def get_response_from_llm(passed_prompt):
     try:
+        MEMORIES = load_memories()
+        print("Memories have been loaded.\n\n")
+        #print(MEMORIES)
         formatted_prompt = prompt.format(moods=SPECIAL_DIRECTIVES,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
