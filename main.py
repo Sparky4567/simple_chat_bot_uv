@@ -168,6 +168,9 @@ def get_user_input():
     except Exception as e:
         print("Exception: {e}".format(e))
         starter_function()
+    except KeyboardInterrupt:
+        print("Quitting...")
+        quit()
 # --- Main loop ---
 def starter_function():
     try:
