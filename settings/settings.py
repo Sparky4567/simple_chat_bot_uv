@@ -3,7 +3,7 @@ import os
 # --- Config ---
 USE_SIMILARITY_SCORING = True
 # First run requires to set USE_LOCAL_LLM to False
-USE_LOCAL_LLM=False
+USE_LOCAL_LLM=True
 SPHINX=False
 SPEAK_BACK=True
 BOT_NAME = "VALERYAN v.1.0"

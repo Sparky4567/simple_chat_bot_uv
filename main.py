@@ -14,6 +14,7 @@ import sounddevice as sd
 import soundfile as sf
 import time
 from memories.Mem_module import MemoryDB
+from random import randint
 
 # Import settings
 
@@ -33,6 +34,10 @@ from settings.settings import (
 # --- Memories ---
 
 memories = MemoryDB()
+
+def mood_choose():
+    rand=randint(1,100)
+    return str(rand)
 
 def load_memories():
     try:
@@ -80,6 +85,7 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 def get_response_from_llm(passed_prompt):
     try:
         DIRECTIVES = directives_loader(BOT_NAME)
+        MOOD = mood_choose()
         print("Loading directives...\n\n")
         MEMORIES = load_memories()
         print("Memories have been loaded.\n\n")
@@ -87,9 +93,9 @@ def get_response_from_llm(passed_prompt):
         # Define a prompt template
         prompt = PromptTemplate(
             input_variables=["question"],
-            template="Those are your possible moods:{moods},Those are your instructions:{directives}\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
+            template="Those are your possible moods:{moods}.\n,You chose mood:{chosen_mood}.\nThose are your instructions:{directives} to follow while giving the answers.\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
         )
-        formatted_prompt = prompt.format(moods=SPECIAL_DIRECTIVES,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
+        formatted_prompt = prompt.format(moods=SPECIAL_DIRECTIVES,chosen_mood=MOOD,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
         text=""
         for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
             print(chunk, end='', flush=True)
