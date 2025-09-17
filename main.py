@@ -104,13 +104,16 @@ def format_prompt(passed_prompt):
 def get_response_from_llm(passed_prompt):
     try:
         text=""
-        prompt = format_prompt(passed_prompt)
-        for chunk in llm.stream(prompt, stop=["Q:", "User:"]):
-            print(chunk, end='', flush=True)
-            text+=chunk
-        print("\n\n")
-        text+="\n\n"
-        return text
+        if prompt and prompt is not None:
+            prompt = format_prompt(passed_prompt)
+            for chunk in llm.stream(prompt, stop=["Q:", "User:"]):
+                print(chunk, end='', flush=True)
+                text+=chunk
+            print("\n\n")
+            text+="\n\n"
+            return text
+        else:
+            return None
     except Exception as e:
         print(f"LLM Error: {e}")
         get_response_from_llm(passed_prompt)
@@ -222,15 +225,18 @@ def starter_function():
                             ic(f"Best match: {best_match}, Score: {score:.2f}")
                             if score < SIMILARITY_THRESHOLD:
                                 bot_response = "I'm not sure what to say to that."
-
-                    conversation_history.append(str(bot_response).strip())
-                    memory_db = MemoryDB()
-                    memory_db.add_memory(user_input, str(bot_response).strip())
-                    print(f"Memory was added to database.")
-                    print(f"Bot answer - {bot_response} - appended to history")
-                    # --- Speak the bot response ---
-                    speak(str(bot_response))
-                    starter_function()
+                    if bot_response and bot_response is not None:
+                        conversation_history.append(str(bot_response).strip())
+                        memory_db = MemoryDB()
+                        memory_db.add_memory(user_input, str(bot_response).strip())
+                        print(f"Memory was added to database.")
+                        print(f"Bot answer - {bot_response} - appended to history")
+                        # --- Speak the bot response ---
+                        speak(str(bot_response))
+                        starter_function()
+                    else:
+                        print("No valid response generated.")
+                        starter_function()
                 except Exception as e:
                     print(f"Error: {e}")
                     bot_response = "Something went wrong."
