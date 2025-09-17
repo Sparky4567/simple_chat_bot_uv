@@ -82,22 +82,30 @@ history_trainer = ListTrainer(chatbot)
 # --- Initialize Piper TTS ---
 voice = PiperVoice.load(VOICE_MODEL_PATH)
 
-def get_response_from_llm(passed_prompt):
+# Define a function to format the prompt
+def format_prompt(passed_prompt):
     try:
+        # Define a prompt template
         DIRECTIVES = directives_loader(BOT_NAME)
         MOOD = mood_choose()
         print("Loading directives...\n\n")
         MEMORIES = load_memories()
         print("Memories have been loaded.\n\n")
-        #print(MEMORIES)
-        # Define a prompt template
         prompt = PromptTemplate(
-            input_variables=["question"],
-            template="Those are your possible moods:{moods}.\n,You chose mood:{chosen_mood}.\nThose are your instructions:{directives} to follow while giving the answers.\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
-        )
+                input_variables=["question"],
+                template="Those are your possible moods:{moods}.\n,You chose mood:{chosen_mood}.\nThose are your instructions:{directives} to follow while giving the answers.\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
+            )
         formatted_prompt = prompt.format(moods=SPECIAL_DIRECTIVES,chosen_mood=MOOD,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
+        return formatted_prompt
+    except Exception as e:
+        print(f"Error formatting prompt: {e}")
+        return None
+
+def get_response_from_llm(passed_prompt):
+    try:
         text=""
-        for chunk in llm.stream(formatted_prompt,stop=["Q:", "User:"]):
+        prompt = format_prompt(passed_prompt)
+        for chunk in llm.stream(prompt, stop=["Q:", "User:"]):
             print(chunk, end='', flush=True)
             text+=chunk
         print("\n\n")
