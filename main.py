@@ -91,11 +91,11 @@ def format_prompt(passed_prompt):
         print("Loading directives...\n\n")
         MEMORIES = load_memories()
         print("Memories have been loaded.\n\n")
-        prompt = PromptTemplate(
+        new_prompt = PromptTemplate(
                 input_variables=["question"],
                 template="Those are your possible moods:{moods}.\n,You chose mood:{chosen_mood}.\nThose are your instructions:{directives} to follow while giving the answers.\nThe following The following is a record of past conversations:{memories}\nQ: {question}\n"
             )
-        formatted_prompt = prompt.format(moods=SPECIAL_DIRECTIVES,chosen_mood=MOOD,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
+        formatted_prompt = new_prompt.format(moods=SPECIAL_DIRECTIVES,chosen_mood=MOOD,directives=DIRECTIVES,memories=MEMORIES,question=passed_prompt)
         return formatted_prompt
     except Exception as e:
         print(f"Error formatting prompt: {e}")
@@ -104,7 +104,7 @@ def format_prompt(passed_prompt):
 def get_response_from_llm(passed_prompt):
     try:
         text=""
-        if prompt and prompt is not None:
+        if passed_prompt and passed_prompt is not None:
             prompt = format_prompt(passed_prompt)
             for chunk in llm.stream(prompt, stop=["Q:", "User:"]):
                 print(chunk, end='', flush=True)
