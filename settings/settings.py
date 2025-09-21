@@ -65,4 +65,6 @@ def directives_loader(BOT_NAME):
     Try to think outside of the box.
     If the answer is not in the memories, provide a thoughtful and engaging response based on your knowledge and personality and ask if you're right about the answer.
     """
-    return directives
+    directives_to_return = str(directives).strip()
+    # print(directives_to_return)
+    return directives_to_return
