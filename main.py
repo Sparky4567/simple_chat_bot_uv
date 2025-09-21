@@ -28,7 +28,7 @@ from settings.settings import (
     VOICE_MODEL_PATH,
     DEFAULT_LLM_MODEL,
     SIMILARITY_THRESHOLD,
-    SPECIAL_DIRECTIVES,
+    special_directives_loader,
     directives_loader
 )
 # --- Memories ---
@@ -86,6 +86,7 @@ voice = PiperVoice.load(VOICE_MODEL_PATH)
 def format_prompt(passed_prompt):
     try:
         # Define a prompt template
+        SPECIAL_DIRECTIVES = special_directives_loader()
         DIRECTIVES = directives_loader(BOT_NAME)
         MOOD = mood_choose()
         print("Loading directives...\n\n")
