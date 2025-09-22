@@ -87,10 +87,14 @@ def format_prompt(passed_prompt):
     try:
         # Define a prompt template
         SPECIAL_DIRECTIVES = special_directives_loader()
+        #print(SPECIAL_DIRECTIVES)
         DIRECTIVES = directives_loader(BOT_NAME)
+        #print(DIRECTIVES)
         MOOD = mood_choose()
+        #print(MOOD)
         print("Loading directives...\n\n")
         MEMORIES = load_memories()
+        #print(MEMORIES)
         print("Memories have been loaded.\n\n")
         new_prompt = PromptTemplate(
                 input_variables=["question"],
@@ -216,7 +220,10 @@ def starter_function():
                 try:
                     if USE_LOCAL_LLM:
                         bot_response = get_response_from_llm(user_input)
-                        bot_response = str(bot_response).split("</think>")[1].strip() if "</think>" in bot_response else bot_response
+                        if "<think>" in bot_response:
+                            bot_response = str(bot_response).split("</think>")[1].strip()
+                        else:
+                            bot_response = str(bot_response)
                     else:
                         bot_response = chatbot.get_response(user_input)
                         chunk_print(f"Bot: {bot_response}")
